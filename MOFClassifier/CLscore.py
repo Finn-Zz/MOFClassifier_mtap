@@ -43,6 +43,27 @@ else:
                 dst.write(src.read())
             print(f"Extracted {rel_path} to models/")
 
+models_dir_qsp = os.path.join(package_directory, "models_qsp")
+
+if os.path.isdir(models_dir_qsp) and os.listdir(models_dir_qsp):
+    pass
+else:
+    os.makedirs(models_dir_qsp, exist_ok=True)
+    zip_url = "https://github.com/mtap-research/MOFClassifier/archive/refs/heads/main.zip"
+    resp = requests.get(zip_url)
+    resp.raise_for_status()
+    with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
+        prefix = "MOFClassifier-main/MOFClassifier/models_qsp/"
+        for member in z.namelist():
+            if not member.startswith(prefix) or member.endswith("/"):
+                continue
+            rel_path = member[len(prefix):]
+            dest_path = os.path.join(models_dir_qsp, rel_path)
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            with z.open(member) as src, open(dest_path, "wb") as dst:
+                dst.write(src.read())
+            print(f"Extracted {rel_path} to models/")
+
 atom_url = "https://raw.githubusercontent.com/mtap-research/MOFClassifier/main/MOFClassifier/atom_init.json"
 atom_path = os.path.join(package_directory, "atom_init.json")
 
@@ -249,9 +270,17 @@ class Normalizer(object):
         self.mean = state_dict['mean']
         self.std = state_dict['std']
 
-def predict(root_cif, atom_init_file=os.path.join(package_directory, "atom_init.json"), model_dir = os.path.join(package_directory, "models")):
+def predict(root_cif,
+            atom_init_file=os.path.join(package_directory, "atom_init.json"),
+            model = "core"):
     use_cuda = torch.cuda.is_available()
     models_100 = []
+    if model == "core":
+        model_dir = os.path.join(package_directory, "models")
+    elif model == "qsp":
+        model_dir = os.path.join(package_directory, "models_qsp")
+    else:
+        print("Currently only core or qsp are supported.")
     for i in tqdm(range(1, 101)):
         collate_fn = collate_pool
         dataset_test = []
@@ -311,14 +340,21 @@ def predict(root_cif, atom_init_file=os.path.join(package_directory, "atom_init.
 
 
 def predict_batch(
-    root_cifs,
-    atom_init_file=os.path.join(package_directory, "atom_init.json"),
-    model_dir=os.path.join(package_directory, "models"),
-    batch_size=512,
-):
+                    root_cifs,
+                    atom_init_file=os.path.join(package_directory, "atom_init.json"),
+                    model = "core",
+                    batch_size=512,
+                ):
     use_cuda = torch.cuda.is_available()
     models_100 = []
 
+    if model == "core":
+        model_dir = os.path.join(package_directory, "models")
+    elif model == "qsp":
+        model_dir = os.path.join(package_directory, "models_qsp")
+    else:
+        print("Currently only core or qsp are supported.")
+    
     collate_fn = collate_pool
     dataset_test = []
     dataset_test.extend(

@@ -19,16 +19,18 @@ pip install MOFClassifier
 ### Examples                                                                                                     
 ```python
 from MOFClassifier import CLscore
-result = CLscore.predict(root_cif="./example.cif")
+result = CLscore.predict(root_cif="./example.cif", model="core")
 ```
 -  **root_cif**: the path of your structure
+-  **model**: the model name: a. "core": training with CoRE MOF DB; b. "qsp": training with CoRE MOF DB and QMOF DB
 -  **result**: a. cifid: the name of structure; b. all_score: the CLscore predicted by 100 models (bags); c. mean_score: the mean CLscore of CLscores                                                 
 
 ```python
 from MOFClassifier import CLscore
-results = CLscore.predict_batch(root_cifs=["./example1.cif""./example2.cif","./example3.cif"], batch_size=512)
+results = CLscore.predict_batch(root_cifs=["./example1.cif""./example2.cif","./example3.cif"], model="core", batch_size=512)
 ```
 -  **root_cifs**: the path of your structures
+-  **model**: the model name: a. "core": training with CoRE MOF DB; b. "qsp": training with CoRE MOF DB and QMOF DB
 -  **batch_size**: the number of samples
 -  **results**: a. cifid: the name of structure; b. all_score: the CLscore predicted by 100 models (bags); c. mean_score: the mean CLscore of CLscores  
                                                                                 
