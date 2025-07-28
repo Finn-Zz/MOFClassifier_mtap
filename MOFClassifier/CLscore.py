@@ -28,7 +28,7 @@ if os.path.isdir(models_dir) and os.listdir(models_dir):
     pass
 else:
     os.makedirs(models_dir, exist_ok=True)
-    zip_url = "https://github.com/mtap-research/MOFClassifier/archive/refs/heads/main.zip"
+    zip_url = "https://github.com/Chung-Research-Group/MOFClassifier/archive/refs/heads/main.zip"
     resp = requests.get(zip_url)
     resp.raise_for_status()
     with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
@@ -49,7 +49,7 @@ if os.path.isdir(models_dir_qsp) and os.listdir(models_dir_qsp):
     pass
 else:
     os.makedirs(models_dir_qsp, exist_ok=True)
-    zip_url = "https://github.com/mtap-research/MOFClassifier/archive/refs/heads/main.zip"
+    zip_url = "https://github.com/Chung-Research-Group/MOFClassifier/archive/refs/heads/main.zip"
     resp = requests.get(zip_url)
     resp.raise_for_status()
     with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
@@ -64,7 +64,28 @@ else:
                 dst.write(src.read())
             print(f"Extracted {rel_path} to models/")
 
-atom_url = "https://raw.githubusercontent.com/mtap-research/MOFClassifier/main/MOFClassifier/atom_init.json"
+models_dir_h = os.path.join(package_directory, "models_h")
+
+if os.path.isdir(models_dir_h) and os.listdir(models_dir_h):
+    pass
+else:
+    os.makedirs(models_dir_h, exist_ok=True)
+    zip_url = "https://github.com/Chung-Research-Group/MOFClassifier/archive/refs/heads/main.zip"
+    resp = requests.get(zip_url)
+    resp.raise_for_status()
+    with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
+        prefix = "MOFClassifier-main/MOFClassifier/models_h/"
+        for member in z.namelist():
+            if not member.startswith(prefix) or member.endswith("/"):
+                continue
+            rel_path = member[len(prefix):]
+            dest_path = os.path.join(models_dir_h, rel_path)
+            os.makedirs(os.path.dirname(dest_path), exist_ok=True)
+            with z.open(member) as src, open(dest_path, "wb") as dst:
+                dst.write(src.read())
+            print(f"Extracted {rel_path} to models/")
+
+atom_url = "https://raw.githubusercontent.com/Chung-Research-Group/MOFClassifier/main/MOFClassifier/atom_init.json"
 atom_path = os.path.join(package_directory, "atom_init.json")
 
 if not os.path.exists(atom_path):
@@ -279,6 +300,8 @@ def predict(root_cif,
         model_dir = os.path.join(package_directory, "models")
     elif model == "qsp":
         model_dir = os.path.join(package_directory, "models_qsp")
+    elif model == "h":
+        model_dir = os.path.join(package_directory, "models_h")
     else:
         print("Currently only core or qsp are supported.")
     for i in tqdm(range(1, 101)):
@@ -352,6 +375,8 @@ def predict_batch(
         model_dir = os.path.join(package_directory, "models")
     elif model == "qsp":
         model_dir = os.path.join(package_directory, "models_qsp")
+    elif model == "h":
+        model_dir = os.path.join(package_directory, "models_h")
     else:
         print("Currently only core or qsp are supported.")
     
